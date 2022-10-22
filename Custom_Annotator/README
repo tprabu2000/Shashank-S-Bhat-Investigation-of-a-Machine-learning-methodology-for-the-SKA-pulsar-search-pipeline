@@ -1,0 +1,11 @@
+Welcome to cloak : the semi-automated masking software for Mask R-CNN training data.
+To save the co-ordinates of the file you must start a server.
+The server file here is flask_app.py
+Go to terminal and type "python3 <name_of_the_server_file>" to start the server.
+
+You must have flask and flask_cors installed.
+f not present install it via pip3.
+Command : pip3 install <name of the module>
+
+In order to scale it into VMs and make it production ready please use "gunicorn".
+Flask is only for testing development code.

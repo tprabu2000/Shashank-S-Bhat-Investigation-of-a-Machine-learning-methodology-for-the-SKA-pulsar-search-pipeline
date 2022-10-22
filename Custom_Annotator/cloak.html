@@ -1,0 +1,412 @@
+<html>
+<head>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+<title>Show Co ordinates of FOPx image</title>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<style type='text/css'>
+body {
+    font-family: sans-serif;
+}
+button
+{
+  background:yellow;
+  border-color:black;
+  border-width:3px;
+  font-weight:bold;
+  visibility:hidden;
+}
+</style>
+<script>
+
+    function loadImage() {
+        var input, file, fr, img,filename;
+        var cx,cy;
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var lineLength = 30;
+ 
+        var lineLength_x = 25;
+        var lineLength_y = 10;
+  
+        var topl_x, topl_y;
+        var topr_x, topr_y;
+        var botr_x, botr_y;
+        var botl_x, botl_y; 
+        var mid1,mid2;
+ 
+        var p;
+ 
+        document.getElementById("save").addEventListener("click", function() {
+   Save_File();
+}, false); 
+
+      /* document.getElementById("topl_clock").addEventListener("click", function() {
+    rotate_Topl(10);
+}, false); 
+ 
+      document.getElementById("topl_anticlock").addEventListener("click", function() {
+    rotate_Topl(-10);
+}, false); 
+
+       document.getElementById("botl_clock").addEventListener("click", function() {
+    rotate_Botl(10);
+}, false); 
+ 
+      document.getElementById("botl_anticlock").addEventListener("click", function() {
+    rotate_Botl(-10);
+}, false);  
+
+       document.getElementById("topr_clock").addEventListener("click", function() {
+    rotate_Topr(10);
+}, false); 
+ 
+      document.getElementById("topr_anticlock").addEventListener("click", function() {
+    rotate_Topr(-10);
+}, false);  
+
+      document.getElementById("botr_clock").addEventListener("click", function() {
+    rotate_Botr(10);
+}, false); 
+ 
+      document.getElementById("botr_anticlock").addEventListener("click", function() {
+    rotate_Botr(-10);
+}, false);  */    
+
+        if (typeof window.FileReader !== 'function') {
+            write("The file API isn't supported on this browser yet.");
+            return;
+        }
+
+        input = document.getElementById('imgfile');
+        if (!input) {
+            write("Couldn't find the imgfile element.");
+        }
+        else if (!input.files) {
+            write("This browser doesn't seem to support the `files` property");
+        }
+        else {
+            file = input.files[0];
+            filename = file.name;
+            fr = new FileReader();
+            fr.onload = createImage;
+            fr.readAsDataURL(file);
+        }
+
+        function createImage() {
+            img = new Image();
+            img.onload = imageLoaded;
+            img.src = fr.result;
+        }
+
+        function imageLoaded() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            canvas.onclick = imgClicked;
+            ctx.drawImage(img,0,0);
+                        document.getElementById("save").style.visibility = "visible";
+            //alert(canvas.toDataURL("image/png"));
+ 
+            
+        }
+
+        function write(msg) {
+            p = document.createElement('p');
+            p.innerHTML = msg;
+            //filename = msg;
+            document.body.appendChild(p);
+
+        }
+ 
+        /*function Save_File1()
+        {
+ 		var xhr = new XMLHttpRequest();
+		var url = 'http://localhost:3000/save';
+                var body = {"Name":"Shashank"};
+                xhr.open('POST',url,true);
+                xhr.setRequestHeader('Access-Control-Allow-Origin','*');
+                xhr.setRequestHeader('Content-Type','application/json');
+                xhr.onreadystatechange = function(){
+                     if(this.status == 200)
+                     {
+                        console.log(this);
+                        console.log(url,body);
+                     } 
+                }
+                xhr.send(body);
+        }*/
+
+        function Save_File()
+        {
+ 		var mycoord = {"File":filename,
+                                "Top_Coord1":{x:topl_x, y:topl_y},
+                                "Top_Coord2":{x:topr_x, y:topr_y},
+                                "Mid_Coord1":{x: mid1, y:cy},
+                                "Mid_Coord2":{x:mid2, y:cy},
+                                "Bottom_Coord1":{x:botl_x, y:botl_y},
+                                "Bottom_Coord2":{x:botr_x, y:botr_y}}
+ 
+                var dest_url = 'http://127.0.0.1:5000/api/v1/save'
+                var xmlhttp = new XMLHttpRequest()
+                xmlhttp.onreadystatechange = function(){
+                    if(this.readyState == 4 && this.status == 201)
+                    {
+                        console.log(this.responseText)
+                        //write("Window is reloaded");
+                        //var p1 = document.getElementById("success");
+                        //p1.innerHTML = "Success";
+                        alert("Success");
+                        window.location.reload();
+                    }
+                    
+                }
+                //xmlhttp.withCredentials = 1
+                xmlhttp.open("POST",dest_url,true)
+             
+                //var obj = { username: name, password: passwd};
+                xmlhttp.send(JSON.stringify(mycoord))
+        }
+ 
+        function imgClicked(event)
+	{
+		cx = event.clientX - this.offsetLeft;
+		cy = event.clientY - this.offsetTop;
+                mid1 = cx - 5; 
+                ctx.stroke();
+     		ctx.lineWidth = 0.5;
+                ctx.strokeStyle = "#FFFF00";
+    		ctx.beginPath();
+                Draw_Topl1();
+		Draw_Botl1();
+                mid2 = cx + 10;
+		Draw_Topr1();
+		Draw_Botr1();
+                Draw_TopLine();
+                Draw_BotLine();
+	}
+ 
+        function Draw_Topl1()
+        {
+ 		//top left line
+                ctx.moveTo(cx, cy);
+                topl_x = cx - lineLength_x;
+                topl_y = cy - lineLength_y;
+    		ctx.moveTo(topl_x , topl_y);
+    		ctx.lineTo(mid1  , cy );
+    		ctx.stroke();
+        }
+ 
+        function Draw_Topr1()
+        {
+ 		//top right line
+                ctx.moveTo(cx,cy);
+                topr_x = cx + lineLength_x;
+                topr_y = cy - lineLength_y;
+    		ctx.moveTo(topr_x , topr_y);
+    		ctx.lineTo(mid2  , cy );
+                ctx.stroke();
+        }
+ 
+        function Draw_TopLine()
+        {
+ 		//top left line
+                ctx.moveTo(topl_x, topl_y);
+    		ctx.lineTo(topr_x , topr_y);
+    		ctx.moveTo(cx  , cy );
+    		ctx.stroke();
+        }
+  
+        function Draw_Botl1()
+        {
+ 		//bottom left line
+                ctx.moveTo(cx,cy);
+                botl_x = cx - lineLength_x;
+                botl_y = cy + lineLength_y;
+    		ctx.moveTo(botl_x , botl_y);
+    		ctx.lineTo(mid1  , cy );
+                ctx.stroke();
+        }
+ 
+        function Draw_Botr1()
+        {
+ 		//bottom right line
+                ctx.moveTo(cx,cy);
+                botr_x = cx + lineLength_x;
+                botr_y = cy + lineLength_y;
+    		ctx.moveTo(botr_x , botr_y);
+    		ctx.lineTo(mid2  , cy );
+                ctx.stroke();
+        }
+ 
+        function Draw_BotLine()
+        {
+ 		//top left line
+                ctx.moveTo(botl_x, botl_y);
+    		ctx.lineTo(botr_x , botr_y);
+    		ctx.moveTo(cx  , cy );
+    		ctx.stroke();
+        }
+ 
+       
+        /*function Draw_Topl()
+        {
+ 		//top left line
+                ctx.moveTo(cx, cy);
+                topl_x = cx - lineLength;
+                topl_y = cy - lineLength;
+    		ctx.moveTo(topl_x , topl_y);
+    		ctx.lineTo(cx  , cy );
+    		ctx.stroke();
+        }*/
+ 
+ 
+        /*function Draw_Botl()
+        {
+ 		//bottom left line
+                ctx.moveTo(cx,cy);
+                botl_x = cx - lineLength;
+                botl_y = cy + lineLength;
+    		ctx.moveTo(botl_x , botl_y);
+    		ctx.lineTo(cx  , cy );
+                ctx.stroke();
+        }*/
+ 
+        
+ 
+        /*function Draw_Topr()
+        {
+ 		//top right line
+                ctx.moveTo(cx,cy);
+                topr_x = cx + lineLength;
+                topr_y = cy - lineLength;
+    		ctx.moveTo(topr_x , topr_y);
+    		ctx.lineTo(cx  , cy );
+                ctx.stroke();
+        }*/
+ 
+        
+ 
+        /*function Draw_Botr()
+        {
+ 		//bottom right line
+                ctx.moveTo(cx,cy);
+                botr_x = cx + lineLength;
+                botr_y = cy + lineLength;
+    		ctx.moveTo(botr_x , botr_y);
+    		ctx.lineTo(cx  , cy );
+                ctx.stroke();
+        }*/
+ 
+        
+ 
+        /*function rotate_Topl( angle)
+        {
+                //ctx.clear();
+ 		rotateTopl(cx,cy,topl_x,topl_y,angle);
+                Draw_Botl();
+		Draw_Topr();
+		Draw_Botr();
+        }
+ 
+ 
+ 
+        function rotate_Botl( angle)
+        {
+                //ctx.clear();
+ 		Draw_Topl();
+		rotateBotl(cx,cy,botl_x,botl_y,angle);
+		Draw_Topr();
+		Draw_Botr();
+        }
+ 
+        function rotate_Topr( angle)
+        {
+ 		//ctx.clear();
+ 		Draw_Topl();
+		Draw_Botl();
+		rotateTopr(cx,cy,topr_x,topr_y,angle);
+		Draw_Botr();
+        }
+ 
+        function rotate_Botr( angle)
+        {
+ 		//ctx.clear();
+ 		Draw_Topl();
+		Draw_Botl();
+		DrawTopr();
+		rotateBotr(cx,cy,botr_x,botr_y,angle);
+        }
+ 
+        function rotateTopl(cx, cy, x, y, angle) {
+    		var radians = (Math.PI / 180) * angle,
+        	cos = Math.cos(radians),
+        	sin = Math.sin(radians),
+        	nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+        	ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+                topl_x = nx;
+                topl_y = ny;
+                ctx.moveTo(cx, cy);
+                ctx.moveTo(topl_x, topl_y);
+                ctx.lineTo(cx,cy);
+                ctx.stroke();
+    		//return [nx, ny];
+	}
+ 
+        function rotateBotl(cx, cy, x, y, angle) {
+    		var radians = (Math.PI / 180) * angle,
+        	cos = Math.cos(radians),
+        	sin = Math.sin(radians),
+        	nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+        	ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+                botl_x = nx;
+                botl_y = ny;
+                ctx.moveTo(cx, cy);
+                ctx.moveTo(botl_x, botl_y);
+                ctx.lineTo(cx,cy);
+                ctx.stroke();
+    		//return [nx, ny];
+	}
+ 
+        function rotateTopr(cx, cy, x, y, angle) {
+    		var radians = (Math.PI / 180) * angle,
+        	cos = Math.cos(radians),
+        	sin = Math.sin(radians),
+        	nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+        	ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+                botr_x = nx;
+                botr_y = ny;
+                ctx.moveTo(cx, cy);
+                ctx.moveTo(topr_x, topr_y);
+                ctx.lineTo(cx,cy);
+                ctx.stroke();
+    		//return [nx, ny];
+	}
+ 
+        function rotateBotr(cx, cy, x, y, angle) {
+    		var radians = (Math.PI / 180) * angle,
+        	cos = Math.cos(radians),
+        	sin = Math.sin(radians),
+        	nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+        	ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+                topr_x = nx;
+                topr_y = ny;
+                ctx.moveTo(cx, cy);
+                ctx.moveTo(botr_x, botr_y);
+                ctx.lineTo(cx,cy);
+                ctx.stroke();
+    		//return [nx, ny];
+	}*/
+    }
+
+</script>
+
+</head>
+<body>
+<h2>Welcome to Cloak : A semi automated masking software for Mask R-CNN data</h2>  
+<form action='#' onsubmit="return false;">
+    <input type='file' id='imgfile' onchange="loadImage();"/>
+</form>
+    <canvas id="canvas"></canvas>
+ 
+<button id="save"">Save Co-ordinates to JSON File</button>
+<p id="success"></p>
+</body>
